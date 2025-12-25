@@ -1,14 +1,16 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView
-from django.urls import reverse_lazy
-from order.forms.user import LoginForm, CustomUserCreationForm
+
+from order.forms.user import CustomUserCreationForm, LoginForm
 
 
 class RegistrationView(CreateView):
     """Регистрация нового пользователя."""
+
     form_class = CustomUserCreationForm
     template_name = "user/registration.html"
     success_url = reverse_lazy("order_list")
@@ -48,4 +50,3 @@ class LogoutView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         logout(request)
         return redirect("login")
-

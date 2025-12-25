@@ -4,11 +4,9 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Order(models.Model):
-    """Заказ.
-    """
+    """Заказ."""
 
     class StatusTypes:
-
         CREATED = "CREATED"
         PROCESSING = "PROCESSING"
         ASSEMBLING = "ASSEMBLING"

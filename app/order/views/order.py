@@ -1,20 +1,16 @@
 from django.contrib import messages
-from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_protect
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views import View
-from django.views.generic import ListView, DetailView, CreateView
-from django.urls import reverse_lazy
 from django.db.models import Q
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView
 
 from order.forms.order import OrderForm
 from order.models.order import Order
 
+
 class OrderListView(LoginRequiredMixin, ListView):
     """Список заказов."""
+
     model = Order
     template_name = "order/list.html"
     context_object_name = "orders"
@@ -35,10 +31,7 @@ class OrderListView(LoginRequiredMixin, ListView):
         # Поиск по наименованию
         search_query = self.request.GET.get("search", "")
         if search_query:
-            queryset = queryset.filter(
-                Q(name__icontains=search_query) |
-                Q(description__icontains=search_query)
-            )
+            queryset = queryset.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query))
 
         return queryset.order_by("-created_at")
 
@@ -68,16 +61,18 @@ class OrderListView(LoginRequiredMixin, ListView):
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
     """Детальный просмотр заказа."""
+
     model = Order
     template_name = "order/detail.html"
     context_object_name = "order"
-    pk_url_kwarg = 'id'
+    pk_url_kwarg = "id"
 
     def get_object(self, queryset=None):
         order = super().get_object(queryset)
         # Проверка прав доступа
         if not self.request.user.is_staff and order.user != self.request.user:
             from django.http import Http404
+
             raise Http404("Заказ не найден")
         return order
 
@@ -103,15 +98,16 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
 
 class OrderCreateView(LoginRequiredMixin, CreateView):
     """Создание нового заказа."""
+
     model = Order
     form_class = OrderForm
-    template_name = 'order/create.html'
-    success_url = reverse_lazy('order_list')
+    template_name = "order/create.html"
+    success_url = reverse_lazy("order_list")
 
     def get_form_kwargs(self):
         """Передаем request в форму."""
         kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request  # Теперь форма принимает request
+        kwargs["request"] = self.request  # Теперь форма принимает request
         return kwargs
 
     def form_valid(self, form):
@@ -120,15 +116,15 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
         form.instance.status = Order.StatusTypes.CREATED
 
         # Сохраняем файл документа, если он есть
-        if form.cleaned_data.get('document'):
-            document = form.cleaned_data['document']
+        if form.cleaned_data.get("document"):
+            document = form.cleaned_data["document"]
             form.instance.document = document
 
         response = super().form_valid(form)
-        messages.success(self.request, 'Заказ успешно создан!')
+        messages.success(self.request, "Заказ успешно создан!")
         return response
 
     def form_invalid(self, form):
         """Обработка невалидной формы."""
-        messages.error(self.request, 'Пожалуйста, исправьте ошибки в форме.')
+        messages.error(self.request, "Пожалуйста, исправьте ошибки в форме.")
         return super().form_invalid(form)

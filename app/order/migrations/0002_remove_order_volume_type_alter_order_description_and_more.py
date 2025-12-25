@@ -4,34 +4,44 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('order', '0001_initial'),
+        ("order", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='order',
-            name='volume_type',
+            model_name="order",
+            name="volume_type",
         ),
         migrations.AlterField(
-            model_name='order',
-            name='description',
-            field=models.TextField(blank=True, verbose_name='Описание'),
+            model_name="order",
+            name="description",
+            field=models.TextField(blank=True, verbose_name="Описание"),
         ),
         migrations.AlterField(
-            model_name='order',
-            name='name',
-            field=models.CharField(max_length=256, verbose_name='Наименование заказа'),
+            model_name="order",
+            name="name",
+            field=models.CharField(max_length=256, verbose_name="Наименование заказа"),
         ),
         migrations.AlterField(
-            model_name='order',
-            name='quantity',
-            field=models.PositiveIntegerField(verbose_name='Количество'),
+            model_name="order",
+            name="quantity",
+            field=models.PositiveIntegerField(verbose_name="Количество"),
         ),
         migrations.AlterField(
-            model_name='order',
-            name='status',
-            field=models.CharField(choices=[('CREATED', 'Создан'), ('PROCESSING', 'Обрабатывается'), ('ASSEMBLING', 'Собирается'), ('DELIVERING', 'Доставляется'), ('READY', 'Готов')], default='CREATED', max_length=32, verbose_name='Статус'),
+            model_name="order",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("CREATED", "Создан"),
+                    ("PROCESSING", "Обрабатывается"),
+                    ("ASSEMBLING", "Собирается"),
+                    ("DELIVERING", "Доставляется"),
+                    ("READY", "Готов"),
+                ],
+                default="CREATED",
+                max_length=32,
+                verbose_name="Статус",
+            ),
         ),
     ]

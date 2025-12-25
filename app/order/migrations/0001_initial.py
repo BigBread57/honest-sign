@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -19,14 +18,43 @@ class Migration(migrations.Migration):
             fields=[
                 ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("name", models.CharField(max_length=200, verbose_name="Наименование заказа")),
-                ("volume_type", models.CharField(choices=[("CREATED", "Создан")], default="single", max_length=10, verbose_name="Тип объёма")),
+                (
+                    "volume_type",
+                    models.CharField(
+                        choices=[("CREATED", "Создан")], default="single", max_length=10, verbose_name="Тип объёма"
+                    ),
+                ),
                 ("description", models.TextField(blank=True, null=True, verbose_name="Описание")),
-                ("document", models.FileField(blank=True, null=True, upload_to="order_documents/", verbose_name="Документ")),
+                (
+                    "document",
+                    models.FileField(blank=True, null=True, upload_to="order_documents/", verbose_name="Документ"),
+                ),
                 ("quantity", models.IntegerField(default=1, verbose_name="Количество")),
-                ("status", models.CharField(choices=[("created", "Создан"), ("processing", "Обрабатывается"), ("assembling", "Собирается"), ("delivering", "Доставляется"), ("ready", "Готов")], default="created", max_length=20, verbose_name="Статус")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("created", "Создан"),
+                            ("processing", "Обрабатывается"),
+                            ("assembling", "Собирается"),
+                            ("delivering", "Доставляется"),
+                            ("ready", "Готов"),
+                        ],
+                        default="created",
+                        max_length=20,
+                        verbose_name="Статус",
+                    ),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True, verbose_name="Дата создания записи")),
                 ("updated_at", models.DateTimeField(auto_now=True, verbose_name="Дата изменения записи")),
-                ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name="Пользователь")),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Пользователь",
+                    ),
+                ),
             ],
             options={
                 "verbose_name": "Заказ",

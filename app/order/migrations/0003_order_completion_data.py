@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('order', '0002_remove_order_volume_type_alter_order_description_and_more'),
+        ("order", "0002_remove_order_volume_type_alter_order_description_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='order',
-            name='completion_data',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Дата готовности'),
+            model_name="order",
+            name="completion_data",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Дата готовности"),
         ),
     ]

@@ -1,10 +1,8 @@
 from django.shortcuts import redirect
-from django.urls import reverse
 
 
 class AuthRequiredMiddleware:
-    """Авторизованный доступ к апи.
-    """
+    """Авторизованный доступ к апи."""
 
     def __init__(self, get_response):
         self.get_response = get_response

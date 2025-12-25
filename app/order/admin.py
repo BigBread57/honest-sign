@@ -6,8 +6,7 @@ from .models import Order
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    """Заказ.
-    """
+    """Заказ."""
 
     list_display = (
         "id",
@@ -15,16 +14,14 @@ class OrderAdmin(admin.ModelAdmin):
         "name",
         "status",
     )
-    list_filter = (
-        "status",
-    )
+    list_filter = ("status",)
     search_fields = (
         "name",
         "user__username",
     )
 
     def save_model(self, request, obj, form, change):
-        if change and 'status' in form.changed_data:
+        if change and "status" in form.changed_data:
             if obj.status == Order.StatusTypes.READY:
                 obj.completion_date = timezone.now()
         elif not change and obj.status == Order.StatusTypes.READY:
