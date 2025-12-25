@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Создание заказа{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Создание нового заказа</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">Наименование заказа *</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Укажите название вашего заказа</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.quantity.id_for_label }}" class="form-label">Количество *</label>
+                        {{ form.quantity }}
+                        {% if form.quantity.errors %}
+                            <div class="text-danger">{{ form.quantity.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Введите количество товаров в заказе</div>
+                    </div>
+
+                    <!-- Поля для единичного заказа (quantity = 1) -->
+                    <div id="single-fields" class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">Описание товара *</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Подробно опишите товар (характеристики, размеры, цвет и т.д.)</div>
+                    </div>
+
+                    <!-- Поля для множественного заказа (quantity > 1) -->
+                    <div id="multiple-fields" class="mb-3" style="display: none;">
+                        <div class="mb-3">
+                            <label for="{{ form.document.id_for_label }}" class="form-label">Документ с товарами *</label>
+                            {{ form.document }}
+                            {% if form.document.errors %}
+                                <div class="text-danger">{{ form.document.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                Загрузите документ (PDF, Word, Excel) со списком товаров<br>
+                                <small>Максимальный размер: 10MB. Допустимые форматы: .pdf, .doc, .docx, .xls, .xlsx</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <small>
+                            <strong>Как работает:</strong><br>
+                            • Если количество = 1 → заполните поле "Описание товара"<br>
+                            • Если количество > 1 → прикрепите документ со списком товаров<br>
+                            • Наименование заказа и количество обязательны всегда
+                        </small>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'order_list' %}" class="btn btn-secondary me-md-2">Отмена</a>
+                        <button type="submit" class="btn btn-primary">Создать заказ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('id_quantity');
+    const singleFields = document.getElementById('single-fields');
+    const multipleFields = document.getElementById('multiple-fields');
+    const descriptionInput = document.getElementById('id_description');
+    const documentInput = document.getElementById('id_document');
+
+    function toggleFields() {
+        const quantity = parseInt(quantityInput.value) || 0;
+
+        if (quantity === 1) {
+            singleFields.style.display = 'block';
+            multipleFields.style.display = 'none';
+            if (descriptionInput) descriptionInput.required = true;
+            if (documentInput) documentInput.required = false;
+        } else if (quantity > 1) {
+            singleFields.style.display = 'none';
+            multipleFields.style.display = 'block';
+            if (descriptionInput) descriptionInput.required = false;
+            if (documentInput) documentInput.required = true;
+        } else {
+            singleFields.style.display = 'none';
+            multipleFields.style.display = 'none';
+            if (descriptionInput) descriptionInput.required = false;
+            if (documentInput) documentInput.required = false;
+        }
+    }
+
+    quantityInput.addEventListener('input', toggleFields);
+    quantityInput.addEventListener('change', toggleFields);
+
+    toggleFields();
+
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        const quantity = parseInt(quantityInput.value) || 0;
+
+        if (quantity === 1 && !descriptionInput.value.trim()) {
+            event.preventDefault();
+            alert('Для единичного заказа необходимо заполнить описание товара');
+            descriptionInput.focus();
+            return false;
+        }
+
+        if (quantity > 1 && !documentInput.value) {
+            event.preventDefault();
+            alert('Для множественного заказа необходимо прикрепить документ');
+            documentInput.focus();
+            return false;
+        }
+
+        return true;
+    });
+});
+</script>
+
+<style>
+#single-fields textarea {
+    min-height: 120px;
+}
+
+#multiple-fields input[type="file"] {
+    padding: 10px;
+    border: 2px dashed #dee2e6;
+    border-radius: 5px;
+    width: 100%;
+}
+
+#multiple-fields input[type="file"]:hover {
+    border-color: #0d6efd;
+    background-color: #f8f9fa;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.alert-info {
+    background-color: #e7f1ff;
+    border-color: #b6d4fe;
+}
+</style>
+{% endblock %}

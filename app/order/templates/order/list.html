@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block name %}{% if user.is_staff %}Все заказы{% else %}Мои заказы{% endif %} - HonestSignOrder{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-2">
+            <i class="bi bi-list-ul text-primary me-2"></i>
+            {% if user.is_staff %}Все заказы{% else %}Мои заказы{% endif %}
+        </h1>
+        <p class="text-muted">
+            {% if user.is_staff %}
+                Управление всеми заказами системы
+            {% else %}
+                Здесь отображаются все ваши заказы
+            {% endif %}
+        </p>
+    </div>
+    <a href="{% url 'order_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Создать заказ
+    </a>
+</div>
+
+<!-- Статистика и фильтры -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label for="status" class="form-label fw-bold">
+                            <i class="bi bi-funnel me-1"></i>Фильтр по статусу
+                        </label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="">Все статусы</option>
+                            {% for key, value in statuses.items %}
+                                <option value="{{ key }}" 
+                                    {% if current_status == key %}selected{% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-filter me-1"></i>Применить фильтр
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        {% if current_status %}
+                            <a href="{% url 'order_list' %}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-x-circle me-1"></i>Сбросить
+                            </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-name mb-0">Всего заказов</h6>
+                        <h2 class="mb-0">{{ orders.count }}</h2>
+                    </div>
+                    <i class="bi bi-inbox-fill" style="font-size: 3rem; opacity: 0.8;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Список заказов -->
+{% if orders %}
+<div class="row">
+    {% for order in orders %}
+    <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+        <div class="card order-card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 text-truncate">
+                    <i class="bi bi-box me-1"></i>{{ order.name }}
+                </h6>
+                <span class="badge status-{{ order.status }} status-badge">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Номер заказа</small>
+                        <strong>#{{ order.id }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Создан</small>
+                        <span>{{ order.created_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    {% if order.ready_date %}
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Готов</small>
+                        <span class="text-success">{{ order.ready_date|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.is_staff %}
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Клиент</small>
+                        <small class="text-truncate" style="max-width: 150px;" 
+                               name="{{ order.user.get_full_name }}">
+                            {{ order.user.get_full_name }}
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    {% if order.quantity == 1 %}
+                        <span class="badge bg-info">
+                            <i class="bi bi-1-circle me-1"></i>Единичный
+                        </span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-123 me-1"></i>Множественный ({{ order.quantity }})
+                        </span>
+                    {% endif %}
+                    
+                    <div class="text-muted small">
+                        <i class="bi bi-calendar3 me-1"></i>
+                        {{ order.created_at|timesince }} назад
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top-0 pt-0">
+                <div class="d-grid">
+                    <a href="{% url 'order_detail' order.id %}"
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-eye me-1"></i>Подробнее
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация (если нужно) -->
+{% if orders.has_other_pages %}
+<nav aria-label="Навигация по страницам">
+    <ul class="pagination justify-content-center mt-4">
+        {% if orders.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ orders.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+        {% endif %}
+        
+        {% for i in orders.paginator.page_range %}
+            {% if orders.number == i %}
+                <li class="page-item active">
+                    <span class="page-link">{{ i }}</span>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ i }}{% if current_status %}&status={{ current_status }}{% endif %}">
+                        {{ i }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if orders.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ orders.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<!-- Пустой список -->
+<div class="text-center py-5">
+    <div class="mb-4">
+        <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+    </div>
+    <h4 class="text-muted mb-3">
+        {% if current_status %}
+            Заказов с выбранным статусом не найдено
+        {% else %}
+            Заказы отсутствуют
+        {% endif %}
+    </h4>
+    <p class="text-muted mb-4">
+        {% if current_status %}
+            Попробуйте изменить фильтр или создать новый заказ
+        {% else %}
+            Создайте свой первый заказ прямо сейчас
+        {% endif %}
+    </p>
+    <a href="{% url 'order_create' %}" class="btn btn-primary btn-lg">
+        <i class="bi bi-plus-circle me-2"></i>Создать первый заказ
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}
